@@ -1,3 +1,4 @@
+import os
 import json
 import uuid
 
@@ -8,13 +9,18 @@ from flask_restful import Resource, Api, abort
 app = Flask(__name__)
 api = Api(app)
 
+API_HOST = os.environ.get('API_HOST', 'localhost')
+
+
 def generate_uuid():
     identifier = uuid.uuid4()
     return json.dumps(identifier, default=str)
 
+
 def get_utc_now():
     now = datetime.utcnow().replace(tzinfo=timezone.utc)
     return json.dumps(now, default=str)
+
 
 MEASUREMENTS = [
     {
@@ -51,7 +57,7 @@ class MeasurementList(Resource):
     def post(self):
         data = json.loads(request.data)
         measurement = {
-            'id': generate_uuid(), 
+            'id': generate_uuid(),
             'sys': data.get('sys'),
             'dia': data.get('dia'),
             'pul': data.get('pul'),
@@ -66,4 +72,4 @@ api.add_resource(Measurement, '/v1/measurements/<string:id>')
 api.add_resource(MeasurementList, '/v1/measurements')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host=API_HOST)
