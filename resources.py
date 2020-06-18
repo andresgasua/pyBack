@@ -82,7 +82,7 @@ class MeasurementList(Resource):
 
 
 class ReportDetail(Resource):
-
+    @swag_from('docs/report_detail.yml', methods=['GET'])
     def get(self, period):
         try:
             report = Report.objects(period=period).first()
