@@ -6,7 +6,11 @@ def normalize_data(data):
 
 
 def get_formatted_date(date):
-    return datetime.strftime(date, '%Y-%m-$d')
+    return datetime.strftime(date, '%Y-%m-%d')
+
+
+def get_today_date():
+    return datetime.utcnow()
 
 
 def get_yesterday_date():
