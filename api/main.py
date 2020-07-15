@@ -1,11 +1,13 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_restful import Api
 from flask_mongoengine import MongoEngine
 from flasgger import Swagger
+from mongoengine.errors import ValidationError, NotUniqueError
 
 import constants
-from resources import MeasurementList, MeasurementDetail, ReportDetail
-
+import errors
+from resources import MeasurementList, MeasurementDetail, ReportDetail, UserList
 
 app = Flask(__name__)
 
@@ -20,16 +22,25 @@ app.config['MONGODB_SETTINGS'] = {
 
 app.config['SWAGGER'] = {
     'title': 'AHM API',
-    'uiversion': 2
+    'uiversion': 3
 }
 
-api = Api(app)
+CORS(app, resources={r'/*': {'origins': '*'}})
+
+api = Api(app, catch_all_404s=True)
 db = MongoEngine(app)
 swagger = Swagger(app)
+
 
 api.add_resource(MeasurementDetail, '/v1/measurements/<string:id>')
 api.add_resource(MeasurementList, '/v1/measurements')
 api.add_resource(ReportDetail, '/v1/report/<string:period>')
+api.add_resource(UserList, '/v1/user_list')
+
+app.register_error_handler(ValidationError, errors.handle_db_request_exception)
+app.register_error_handler(NotUniqueError, errors.handle_db_request_exception)
+app.register_error_handler(Exception, errors.handle_general_exception)
+
 
 if __name__ == '__main__':
     app.run(host=constants.API_HOST)
